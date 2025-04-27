@@ -1,0 +1,95 @@
+[project]
+name = "pytest-result-notify"
+version = "0.1.1"
+description = "Default template for PDM package"
+authors = [
+    {name = "yanlong.wu", email = "yanlong.wu@smartx.com"},
+]
+dependencies = ["pytest>=8.3.5", "requests>=2.32.3"]
+requires-python = ">=3.8"
+readme = "README.md"
+license = {text = "MIT"}
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+
+[tool.pdm]
+distribution = true
+
+
+# 插件入口
+[project.entry-points.pytest11]
+result_log = "pytest_result_notify.plugin"
+
+
+# 源码路径
+[tool.pdm.build]
+package-dir = "src"
+
+
+[dependency-groups]
+dev = [
+    "black>=24.8.0",
+    "isort>=5.13.2",
+    "flake8>=5.0.4",
+]
+
+
+[tool.black]
+line-length = 120
+target-version = ["py38"]
+exclude = '''
+/(
+  \.eggs
+  |\.git
+  |\.hg
+  |\.mypy_cache
+  |\.tox
+  |\.venv
+  |_build
+  |buck-out
+  |build
+  |dist
+  |venv
+  |version.py
+)/
+'''
+ 
+[tool.isort]
+profile = "black"
+multi_line_output = 2
+line_length = 120
+skip_glob = ["*/version.py", "*/__init__.py"]
+ 
+[tool.flake8]
+max-line-length = 120
+ignore = ["D100", "D101", "D102", "D103", "D104", "D105", "D107", "D202", "E203", "E231", "W293", "C408"]
+select = ["E", "F", "W", "C901"]
+import-order-style = "google"
+per-file-ignores = [
+    "*/tests/*:D",
+    "*/__init__.py:F401"
+]
+exclude = [
+    ".git", "__pycache__", ".mypy_cache", ".tox", ".venv",
+    "build", "dist", "venv", "version.py",
+    "docs/jupyter_execute/*", "*/build", "*/tests/*"
+]
+jobs = 2
+ 
+[tool.pdm.scripts]
+
+check = {composite = [
+    "isort --atomic .",          # 第一步：排序导入
+    "black . -l 120",                   # 第二步：格式化代码
+    "flake8 . --max-line-length=120",                  # 第三步：静态检查
+]}
+
+format = {composite = [
+    "isort --atomic .",
+    "black . -l 120"
+]}
+ 
+test = "pytest"

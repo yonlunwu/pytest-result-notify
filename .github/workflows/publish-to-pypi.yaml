@@ -1,0 +1,38 @@
+name: Publish Python 🐍 distributions 👛 to PyPI  # 工作流名称
+
+on:
+  push:  # 当有代码推送时触发
+    tags:  # 仅在推送标签时触发
+      - '*'  # 匹配所有标签
+
+jobs:
+  build-publish:  # 任务 ID
+    name: Build and Publish to PyPI  # 任务名称
+    runs-on: ubuntu-latest  # 指定运行环境为最新的 Ubuntu
+
+    # permissions:
+    #   id-token: write  # 允许 OIDC 认证的写入权限
+
+    steps:  # 步骤定义
+      - uses: actions/checkout@v2  # 检出代码
+      
+      - name: Set up Python  # 设置 Python 环境
+        uses: actions/setup-python@v2  # 使用 setup-python Action
+        with:
+          python-version: '3.8'  # 指定安装 Python 版本
+
+      - name: Install pypa/build  # 安装构建工具
+        run: python -m pip install build --user  # 使用 pip 安装 build
+
+      - name: Build a binary wheel and a source tar package  # 构建包
+        run: python -m build --wheel --outdir dist/  # 生成二进制轮子和源代码包
+
+      - name: Publish to PyPI  # 发布到 PyPI
+        if: startsWith(github.ref, 'refs/tags')  # 仅在推送标签时执行
+        uses: pypa/gh-action-pypi-publish@release/v1  # 通常指向该版本的最新稳定版本，适合生产环境
+        # uses: pypa/gh-action-pypi-publish@master  # 指向开发中的最新版本，可能包含未经充分测试的新特性或修复，可能引入不稳定因素。
+
+        with:
+          # repository-url: ${{ secrets.PYPI_API_TOKEN_163 }}  # 使用 GitHub Secrets 中的 PyPI API 令牌
+          user: __token__  # 使用 token 作为用户名
+          password: ${{ secrets.PYPI_API_TOKEN_163 }}  # 使用 GitHub Secrets 中的 PyPI API 令牌
